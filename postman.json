@@ -1,0 +1,222 @@
+{
+  "info": {
+    "_postman_id": "codeshare-test-collection",
+    "name": "CodeShare服务测试",
+    "description": "用于测试CodeShare代码分享服务的API接口",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "直接访问CodeShare服务",
+      "item": [
+        {
+          "name": "上传代码片段",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"author\": \"测试用户\",\n    \"language\": \"go\",\n    \"content\": \"package main\\n\\nimport \\\"fmt\\\"\\n\\nfunc main() {\\n    fmt.Println(\\\"Hello, CodeShare!\\\")\\n}\",\n    \"ttl\": 3600\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8081/upload",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8081",
+              "path": ["upload"]
+            },
+            "description": "上传一个Go语言代码片段，有效期1小时(3600秒)"
+          },
+          "response": []
+        },
+        {
+          "name": "获取代码片段",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8081/code/{{code_hash}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8081",
+              "path": ["code", "{{code_hash}}"]
+            },
+            "description": "通过哈希值获取代码片段，需要先执行上传请求获取哈希值"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "通过API网关访问",
+      "item": [
+        {
+          "name": "上传代码片段(网关)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"author\": \"网关用户\",\n    \"language\": \"python\",\n    \"content\": \"print('Hello from Gateway')\\nprint('This code is routed through the gateway')\",\n    \"ttl\": 7200\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/CodeShare/upload",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["CodeShare", "upload"]
+            },
+            "description": "通过API网关上传Python代码片段，有效期2小时(7200秒)"
+          },
+          "response": []
+        },
+        {
+          "name": "获取代码片段(网关)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/CodeShare/code/{{code_hash}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["CodeShare", "code", "{{code_hash}}"]
+            },
+            "description": "通过API网关获取代码片段，需要先执行上传请求获取哈希值"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "其他端口实例",
+      "item": [
+        {
+          "name": "上传到8082端口",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"author\": \"Port8082\",\n    \"language\": \"javascript\",\n    \"content\": \"console.log('Running on port 8082');\",\n    \"ttl\": 3600\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8082/upload",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8082",
+              "path": ["upload"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "上传到8083端口",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"author\": \"Port8083\",\n    \"language\": \"java\",\n    \"content\": \"public class Test {\\n    public static void main(String[] args) {\\n        System.out.println(\\\"Running on port 8083\\\");\\n    }\\n}\",\n    \"ttl\": 3600\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8083/upload",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8083",
+              "path": ["upload"]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// 此脚本在每个请求前执行",
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// 此脚本在每个请求后执行",
+          "// 如果是上传请求，保存返回的哈希值用于后续请求",
+          "if (pm.request.method === 'POST' && pm.request.url.path.includes('upload')) {",
+          "    try {",
+          "        const responseJson = pm.response.json();",
+          "        if (responseJson.hash) {",
+          "            pm.collectionVariables.set('code_hash', responseJson.hash);",
+          "            console.log('已保存代码哈希值:', responseJson.hash);",
+          "        }",
+          "    } catch (e) {",
+          "        console.log('无法解析响应或提取哈希值');",
+          "    }",
+          "}"
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "code_hash",
+      "value": "",
+      "type": "string",
+      "description": "存储上传代码后返回的哈希值，用于获取请求"
+    },
+    {
+      "key": "gateway_port",
+      "value": "8080",
+      "type": "string",
+      "description": "API网关端口"
+    }
+  ]
+}

@@ -12,6 +12,7 @@ import (
 
 type Server struct {
 	httpServer *http.Server
+	Port       string
 }
 
 func NewServer(addr string, handler http.Handler) (*Server, error) {
@@ -21,6 +22,7 @@ func NewServer(addr string, handler http.Handler) (*Server, error) {
 	}
 	return &Server{
 		httpServer: srv,
+		Port:       addr,
 	}, nil
 }
 
