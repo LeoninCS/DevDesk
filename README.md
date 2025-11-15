@@ -1,7 +1,6 @@
 # 🌟 Moment
 
 [![Go Version](https://img.shields.io/badge/Go-1.16%2B-00ADD8?logo=go&logoColor=white)](https://go.dev/)
-[![Redis](https://img.shields.io/badge/Redis-6.0%2B-dc382d?logo=redis&logoColor=white)](https://redis.io/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Stars](https://img.shields.io/github/stars/LeoninCS/Moment?style=social)](https://github.com/LeoninCS/Moment/stargazers)
 [![Issues](https://img.shields.io/github/issues/LeoninCS/Moment.svg)](https://github.com/LeoninCS/Moment/issues)
@@ -24,18 +23,17 @@
 
 ## 🔧 功能介绍
 - **CodeShare**：代码分享功能，帮助你分享代码片段。
-
+- **TextCrypto**: 文本的加密与解密。
 ---
 
 ## 💻 环境要求
 - **Go**：1.16 及以上  
-- **Redis**：6.0 及以上
 - **Vue**：3.4 及以上
 ---
 
 ## ⚙️ 如何启动项目
 
-1. **确保你已经安装了 Go 和 Redis，并且配置好环境变量。**  
+1. **确保你已经安装了 Go 和 Vue，并且配置好环境变量。**  
 2. **克隆项目到本地：**
    
    ```bash
@@ -45,6 +43,7 @@
    
    ```bash
    cd Moment
+   cd backend
    ```
 4. **安装项目依赖：**
    ```bash
@@ -52,6 +51,7 @@
    ```
 5. **启动项目：**
    ```bash
+   cd ..
    chmod +x start.sh   # 赋予脚本执行权限
    ./start.sh          # 启动项目
    ```
