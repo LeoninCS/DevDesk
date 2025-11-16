@@ -2,7 +2,7 @@
 import axios from 'axios'
 
 // 环境变量（如果没配置就默认 '/api'）
-const baseURL = import.meta.env.VITE_API_BASE || '/api'
+const baseURL = import.meta.env.VITE_API_BASE || '/'
 
 export const api = axios.create({
   baseURL,
