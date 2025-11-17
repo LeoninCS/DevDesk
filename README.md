@@ -8,7 +8,11 @@
 
 ---
 ## [功能演示](https://www.bilibili.com/video/BV1RoC7BJEeZ?vd_source=7ef1f5a4e0294748f7a212f3d8c485da)
-
+## 效果演示
+![alt text](image.png)
+![alt text](image-1.png)
+![alt text](image-2.png)
+![alt text](image-3.png)
 ## 📝 前言
 > **持续更新中，欢迎贡献代码！**  
 > **如果你有什么好的 tips 或建议，欢迎在 Issues 中提出，或者联系作者。**
