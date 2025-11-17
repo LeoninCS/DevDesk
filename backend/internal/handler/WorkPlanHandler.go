@@ -19,7 +19,7 @@ func NewWorkPlanHandler() *WorkPlanHandler {
 }
 
 // 创建新的个人计划
-func (h *WorkPlanHandler) NewPlan(c *gin.Context) {
+func (h *WorkPlanHandler) NewPersonlPlan(c *gin.Context) {
 	pp := h.wp.NewPersonalPlan()
 	c.JSON(http.StatusOK, gin.H{
 		"hash": pp.Hash,

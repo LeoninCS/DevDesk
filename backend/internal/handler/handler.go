@@ -44,12 +44,12 @@ func NewHandler() http.Handler {
 	workPlanHandler := NewWorkPlanHandler()
 	wg := r.Group("/workplan")
 	{
-		wg.GET("/new", workPlanHandler.NewPlan)
+		wg.GET("/new", workPlanHandler.NewPersonlPlan)
 		wg.POST("/add", workPlanHandler.AddTODO)
 		wg.POST("/delete", workPlanHandler.DeleteTODO)
 		wg.POST("/edit", workPlanHandler.EditTODO)
 		wg.POST("/done", workPlanHandler.SetDone)
-		wg.GET("/todos/:hash", workPlanHandler.GetTODOs)
+		wg.GET("/:hash", workPlanHandler.GetTODOs)
 	}
 
 	return r
