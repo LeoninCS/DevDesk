@@ -16,16 +16,14 @@ func NewCodeShareHandler(cs *service.CodeShare) *CodeShareHandler {
 	return &CodeShareHandler{cs: cs}
 }
 
-type uploadRequest struct {
-	Author   string `json:"author"   binding:"required"`
-	Language string `json:"language" binding:"required"`
-	Content  string `json:"content"  binding:"required"`
-	TTL      int64  `json:"ttl"`
-}
-
 // POST /codeshare/upload
 func (h *CodeShareHandler) Upload(c *gin.Context) {
-	var req uploadRequest
+	var req uploadRequest {
+		Author   string `json:"author"   binding:"required"`
+		Language string `json:"language" binding:"required"`
+		Content  string `json:"content"  binding:"required"`
+		TTL      int64  `json:"ttl"`
+	}
 
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
