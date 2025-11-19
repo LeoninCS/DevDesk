@@ -97,13 +97,15 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import axios from 'axios'
 
-type TodoItem = {
-  id: number
-  content: string
-  done: boolean
-}
+import {
+  fetchWorkPlanTodos,
+  addWorkPlanTodo,
+  toggleWorkPlanTodo,
+  editWorkPlanTodo,
+  deleteWorkPlanTodo,
+  type TodoItem,
+} from '../api/workplan.ts'
 
 const route = useRoute()
 const router = useRouter()
@@ -121,7 +123,7 @@ const fetchTodos = async () => {
   loading.value = true
   error.value = ''
   try {
-    const res = await axios.get(`/api/workplan/${hash.value}`)
+    const res = await fetchWorkPlanTodos(hash.value)
     todos.value = res.data.todos || []
   } catch (e: any) {
     error.value =
@@ -136,10 +138,7 @@ const handleAdd = async () => {
   adding.value = true
   error.value = ''
   try {
-    await axios.post('/api/workplan/add', {
-      hash: hash.value,
-      content: newContent.value,
-    })
+    await addWorkPlanTodo(hash.value, newContent.value)
     newContent.value = ''
     await fetchTodos()
   } catch (e: any) {
@@ -155,10 +154,7 @@ const toggleDone = async (item: TodoItem) => {
   updatingId.value = item.id
   error.value = ''
   try {
-    await axios.post('/api/workplan/done', {
-      hash: hash.value,
-      id: item.id,
-    })
+    await toggleWorkPlanTodo(hash.value, item.id)
     await fetchTodos()
   } catch (e: any) {
     error.value =
@@ -178,11 +174,7 @@ const editItem = async (item: TodoItem) => {
   updatingId.value = item.id
   error.value = ''
   try {
-    await axios.post('/api/workplan/edit', {
-      hash: hash.value,
-      id: item.id,
-      content: trimmed,
-    })
+    await editWorkPlanTodo(hash.value, item.id, trimmed)
     await fetchTodos()
   } catch (e: any) {
     error.value =
@@ -200,10 +192,7 @@ const deleteItem = async (item: TodoItem) => {
   updatingId.value = item.id
   error.value = ''
   try {
-    await axios.post('/api/workplan/delete', {
-      hash: hash.value,
-      id: item.id,
-    })
+    await deleteWorkPlanTodo(hash.value, item.id)
     await fetchTodos()
   } catch (e: any) {
     error.value =
@@ -225,7 +214,6 @@ onMounted(() => {
   fetchTodos()
 })
 </script>
-
 <style scoped>
 .wpv-page {
   max-width: 900px;

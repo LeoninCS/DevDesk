@@ -41,7 +41,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import axios from 'axios'
+import { createWorkPlan } from '../api/workplan.ts'
 
 const router = useRouter()
 
@@ -54,7 +54,7 @@ const handleStart = async () => {
   loading.value = true
   error.value = ''
   try {
-    const res = await axios.get('/api/workplan/new')
+    const res = await createWorkPlan()
     hash.value = res.data.hash
 
     // 跳转到 TODO 视图页面
