@@ -69,10 +69,10 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref } from "vue";
 import { useRouter } from "vue-router";
-import axios from "axios";
+import { uploadCode } from "../api/codeshare.ts";
 
 const router = useRouter();
 
@@ -105,7 +105,7 @@ const loading = ref(false);
 const shareUrl = ref("");
 
 // 过期时间映射：把选择的项换成秒数
-const expirationSecondsMap = {
+const expirationSecondsMap: Record<string, number> = {
   "10min": 10 * 60,
   "1hour": 60 * 60,
   "1day": 24 * 60 * 60,
@@ -124,8 +124,8 @@ async function handleSubmit() {
     const delta = expirationSecondsMap[form.value.expiration] || (24 * 60 * 60);
     const destroyTime = now + delta; // 过期时间时间戳
 
-    // 调你自己的后端
-    const res = await axios.post("/api/codeshare/upload", {
+    // 使用封装好的 API
+    const res = await uploadCode({
       author: form.value.poster,
       language: form.value.syntax,
       content: form.value.content,
@@ -138,7 +138,7 @@ async function handleSubmit() {
 
     shareUrl.value = finalUrl;
 
-    // 自动跳转到查看页（类似 pastebin）
+    // 自动跳转到查看页
     router.push(`/code/${hash}`);
   } catch (err) {
     console.error(err);

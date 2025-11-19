@@ -39,9 +39,11 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, nextTick } from 'vue'
 import { useRoute } from 'vue-router'
-import axios from 'axios'
 import hljs from 'highlight.js'
 import 'highlight.js/styles/github-dark.css'
+
+// ⭐ 用封装好的 API，而不是直接 axios
+import { getCodeByHash } from '../api/codeshare.ts'
 
 const route = useRoute()
 const hash = route.params.hash as string
@@ -67,7 +69,7 @@ const languageClass = computed(() => {
 
 onMounted(async () => {
   try {
-    const res = await axios.get(`/api/codeshare/code/${hash}`)
+    const res = await getCodeByHash(hash)
 
     author.value = res.data.author || ''
     language.value = res.data.language || ''
@@ -104,6 +106,7 @@ async function copyCode() {
 </script>
 
 <style scoped>
+/* 你的原样式原封不动 */
 .codeshare-view {
   width: 100%;
   max-width: 1200px;
