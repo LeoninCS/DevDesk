@@ -1,6 +1,12 @@
 version: "3.9"
 
 services:
+  cloudflared:
+    image: cloudflare/cloudflared
+    container_name: cloudflared
+    restart: always
+    network_mode: host
+    command: tunnel --no-autoupdate run --token eyJhIjoiNzQ0ZWM5NmE5MDllZWE4MGU2YjZhYTk1YWIzMjc0YzUiLCJ0IjoiNDYxMjNmODctY2I2Mi00ZTZmLTk4NzItMDc4ZjYyMWQyM2QwIiwicyI6IlpXSXlNV0k0WVRJdE1XTmhOeTAwTmpGbUxUZzVNVE10WldWallXVXlOMlUyWlRObSJ9
   backend:
     build:
       context: ./backend
