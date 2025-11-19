@@ -92,17 +92,52 @@ function toggleCodeTheme() {
 }
 
 async function copyCode() {
+  const text = content.value || '';
+
+  if (!text) return;
+
+  // 兜底函数：用 textarea + execCommand 复制
+  const fallbackCopy = () => {
+    try {
+      const textarea = document.createElement('textarea');
+      textarea.value = text;
+      textarea.style.position = 'fixed';
+      textarea.style.opacity = '0';
+      textarea.style.left = '-9999px';
+      document.body.appendChild(textarea);
+      textarea.focus();
+      textarea.select();
+      const ok = document.execCommand('copy');
+      document.body.removeChild(textarea);
+      return ok;
+    } catch (err) {
+      console.error('fallback copy error', err);
+      return false;
+    }
+  };
+
   try {
-    await navigator.clipboard.writeText(content.value || '')
-    copied.value = true
+    // SSR/非浏览器环境保护
+    if (typeof navigator !== 'undefined' &&
+        navigator.clipboard &&
+        typeof navigator.clipboard.writeText === 'function') {
+      await navigator.clipboard.writeText(text);
+    } else {
+      const ok = fallbackCopy();
+      if (!ok) throw new Error('fallback copy failed');
+    }
+
+    // 复制成功
+    copied.value = true;
     setTimeout(() => {
-      copied.value = false
-    }, 1500)
+      copied.value = false;
+    }, 1500);
   } catch (e) {
-    console.error(e)
-    alert('复制失败，请手动选择代码复制')
+    console.error(e);
+    alert('复制失败，请手动选择代码复制');
   }
 }
+
 </script>
 
 <style scoped>
