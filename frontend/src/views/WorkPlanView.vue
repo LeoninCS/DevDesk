@@ -15,6 +15,16 @@
         </button>
       </header>
 
+      <!-- 分享提示：复制当前链接，让别人也能访问这个计划 -->
+      <section v-if="!error" class="wpv-share">
+        <span class="wpv-share-text">
+          分享提示：把当前页面链接保存或发给同事，就可以访问同一份工作计划。
+        </span>
+        <button class="wpv-share-btn" @click="copyLink">
+          {{ linkCopied ? '已复制链接' : '复制当前链接' }}
+        </button>
+      </section>
+
       <section class="wpv-info">
         <p>
           提示：这是一个基于 <strong>hash</strong> 的简单 TODO 看板。
@@ -119,6 +129,9 @@ const updatingId = ref<number | null>(null)
 const newContent = ref('')
 const error = ref('')
 
+// 复制链接状态
+const linkCopied = ref(false)
+
 const fetchTodos = async () => {
   loading.value = true
   error.value = ''
@@ -206,6 +219,52 @@ const goIntro = () => {
   router.push({ name: 'WorkPlan' })
 }
 
+// 复制当前页面链接
+const copyLink = async () => {
+  const url = typeof window !== 'undefined' ? window.location.href : ''
+  if (!url) return
+
+  const fallbackCopy = () => {
+    try {
+      const textarea = document.createElement('textarea')
+      textarea.value = url
+      textarea.style.position = 'fixed'
+      textarea.style.opacity = '0'
+      textarea.style.left = '-9999px'
+      document.body.appendChild(textarea)
+      textarea.focus()
+      textarea.select()
+      const ok = document.execCommand('copy')
+      document.body.removeChild(textarea)
+      return ok
+    } catch (err) {
+      console.error('fallback copy link error', err)
+      return false
+    }
+  }
+
+  try {
+    if (
+      typeof navigator !== 'undefined' &&
+      navigator.clipboard &&
+      typeof navigator.clipboard.writeText === 'function'
+    ) {
+      await navigator.clipboard.writeText(url)
+    } else {
+      const ok = fallbackCopy()
+      if (!ok) throw new Error('fallback copy link failed')
+    }
+
+    linkCopied.value = true
+    setTimeout(() => {
+      linkCopied.value = false
+    }, 1500)
+  } catch (e) {
+    console.error(e)
+    alert('复制链接失败，请手动复制地址栏链接')
+  }
+}
+
 onMounted(() => {
   if (!hash.value) {
     error.value = '缺少计划 hash'
@@ -214,6 +273,7 @@ onMounted(() => {
   fetchTodos()
 })
 </script>
+
 <style scoped>
 .wpv-page {
   max-width: 900px;
@@ -233,7 +293,7 @@ onMounted(() => {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 }
 
 .wpv-header h1 {
@@ -264,8 +324,43 @@ onMounted(() => {
   color: #374151;
 }
 
+/* 分享提示条 */
+.wpv-share {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 10px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: rgba(37, 99, 235, 0.06);
+  border: 1px dashed rgba(37, 99, 235, 0.3);
+  font-size: 13px;
+  color: #374151;
+}
+
+.wpv-share-text {
+  flex: 1;
+}
+
+.wpv-share-btn {
+  flex-shrink: 0;
+  padding: 4px 10px;
+  font-size: 12px;
+  border-radius: 999px;
+  border: 1px solid #2563eb;
+  background: #2563eb;
+  color: #ffffff;
+  cursor: pointer;
+  transition: transform 0.05s ease, box-shadow 0.1s ease;
+}
+
+.wpv-share-btn:active {
+  transform: scale(0.97);
+}
+
 .wpv-info {
-  margin: 8px 0 18px;
+  margin: 4px 0 18px;
   font-size: 13px;
   color: #4b5563;
 }
@@ -393,5 +488,16 @@ onMounted(() => {
 .wpv-action-btn:disabled {
   opacity: 0.6;
   cursor: default;
+}
+
+@media (max-width: 768px) {
+  .wpv-share {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .wpv-share-btn {
+    align-self: flex-end;
+  }
 }
 </style>
