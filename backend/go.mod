@@ -1,4 +1,4 @@
-module moment
+module DevDesk
 
 go 1.24.5
 
