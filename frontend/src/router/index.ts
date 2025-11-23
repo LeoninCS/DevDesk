@@ -5,7 +5,6 @@ import CodeShare from '../views/CodeShare.vue'
 import CodeShareView from '../views/CodeShareView.vue'
 import WorkPlan from '../views/WorkPlan.vue'
 import WorkPlanView from '../views/WorkPlanView.vue'
-import FeatureC from '../components/FeatureC.vue'
 import Markdown from '../views/Markdown.vue';
 import MarkdownEditorView from '../views/MarkdownEditorView.vue';
 const routes: RouteRecordRaw[] = [
@@ -29,11 +28,6 @@ const routes: RouteRecordRaw[] = [
     name: 'WorkPlanView',
     component: WorkPlanView,
     props: true,
-  },
-  {
-    path: '/feature-c',
-    name: 'feature-c',
-    component: FeatureC,
   },
   {
   path: "/markdown",
