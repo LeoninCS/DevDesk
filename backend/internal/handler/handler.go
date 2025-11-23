@@ -52,5 +52,15 @@ func NewHandler() http.Handler {
 		wg.GET("/:hash", workPlanHandler.GetTODOs)
 	}
 
+	// Markdown 分组
+	mdService := service.NewMarkdown()
+	mdHandler := NewMarkdownHandler(mdService)
+	mg := r.Group("/markdown")
+	{
+		mg.GET("/new", mdHandler.NewDocument)
+		mg.GET("/:hash", mdHandler.GetDocument)
+		mg.POST("/update", mdHandler.UpdateDocument)
+		mg.GET("/stream/:hash", mdHandler.StreamDocument)
+	}
 	return r
 }
