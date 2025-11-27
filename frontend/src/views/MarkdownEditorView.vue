@@ -89,6 +89,9 @@ import {
 
 const route = useRoute();
 const router = useRouter();
+const apiBaseUrl =
+  import.meta.env.VITE_API_BASE_URL ||
+  (import.meta.env.DEV ? "http://localhost:8080/api" : "/api");
 
 const hash = computed(() => route.params.hash as string);
 
@@ -298,7 +301,7 @@ const exportPdf = async () => {
 // SSE 协同
 const initSSE = () => {
   if (!hash.value) return;
-  es = new EventSource(`/markdown/stream/${hash.value}`);
+  es = new EventSource(`${apiBaseUrl}/markdown/stream/${hash.value}`);
 
   es.onmessage = (event) => {
     try {
