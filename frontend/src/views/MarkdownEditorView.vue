@@ -99,6 +99,8 @@ const content = ref("");
 const error = ref("");
 const saving = ref(false);
 const lastSavedAt = ref("");
+const lastSyncedContent = ref("");
+const hasPendingLocalChanges = ref(false);
 
 const exporting = ref(false);
 
@@ -134,9 +136,11 @@ const initDoc = async () => {
   try {
     const res = await fetchMarkdownDoc(hash.value);
     const data: MarkdownDocResponse = res.data;
+    const initialContent = data.content || "";
     isRemoteUpdate = true;
-    content.value = data.content || "";
+    content.value = initialContent;
     isRemoteUpdate = false;
+    lastSyncedContent.value = initialContent;
   } catch (e: any) {
     error.value =
       e?.response?.data?.error || e?.message || "加载文档失败，请稍后重试";
@@ -148,15 +152,20 @@ const handleInput = () => {
   if (isRemoteUpdate) return;
   if (!hash.value) return;
 
+  hasPendingLocalChanges.value = true;
+
   if (sendTimer) {
     window.clearTimeout(sendTimer);
   }
 
   sendTimer = window.setTimeout(async () => {
     saving.value = true;
+    const payload = content.value;
     try {
-      await updateMarkdownDoc(hash.value, content.value);
+      await updateMarkdownDoc(hash.value, payload);
+      lastSyncedContent.value = payload;
       lastSavedAt.value = formatTime(new Date());
+      hasPendingLocalChanges.value = false;
     } catch (e: any) {
       error.value =
         e?.response?.data?.error || e?.message || "保存失败，请稍后重试";
@@ -308,11 +317,24 @@ const initSSE = () => {
       const data = JSON.parse(event.data);
       const remoteContent = data.content || "";
 
-      if (remoteContent === content.value) return;
+      if (remoteContent === content.value) {
+        lastSyncedContent.value = remoteContent;
+        hasPendingLocalChanges.value = false;
+        return;
+      }
+
+      if (
+        hasPendingLocalChanges.value &&
+        remoteContent === lastSyncedContent.value
+      ) {
+        return;
+      }
 
       isRemoteUpdate = true;
       content.value = remoteContent;
       isRemoteUpdate = false;
+      lastSyncedContent.value = remoteContent;
+      hasPendingLocalChanges.value = false;
     } catch (e) {
       console.error("parse sse data error", e);
     }
@@ -546,50 +568,50 @@ onBeforeUnmount(() => {
 }
 
 /* Markdown 样式保持不变 */
-.mde-preview h1 {
+:deep(.mde-preview h1) {
   font-size: 24px;
   margin: 16px 0 8px;
 }
-.mde-preview h2 {
+:deep(.mde-preview h2) {
   font-size: 20px;
   margin: 14px 0 8px;
 }
-.mde-preview h3 {
+:deep(.mde-preview h3) {
   font-size: 18px;
   margin: 12px 0 6px;
 }
-.mde-preview p {
+:deep(.mde-preview p) {
   margin: 6px 0;
 }
-.mde-preview code {
+:deep(.mde-preview code) {
   background: #f3f4f6;
   padding: 2px 4px;
   border-radius: 3px;
   font-family: "JetBrains Mono", monospace;
   font-size: 13px;
 }
-.mde-preview pre code {
+:deep(.mde-preview pre code) {
   display: block;
   padding: 10px;
   overflow-x: auto;
 }
-.mde-preview ul,
-.mde-preview ol {
+:deep(.mde-preview ul),
+:deep(.mde-preview ol) {
   padding-left: 22px;
   margin: 6px 0;
 }
-.mde-preview blockquote {
+:deep(.mde-preview blockquote) {
   border-left: 4px solid #e5e7eb;
   margin: 6px 0;
   padding: 4px 10px;
   color: #6b7280;
   background: #f9fafb;
 }
-.mde-preview a {
+:deep(.mde-preview a) {
   color: #2563eb;
   text-decoration: none;
 }
-.mde-preview a:hover {
+:deep(.mde-preview a:hover) {
   text-decoration: underline;
 }
 
