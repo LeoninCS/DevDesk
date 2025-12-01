@@ -15,7 +15,6 @@ func NewHandler() http.Handler {
 	r.Use(func(c *gin.Context) {
 		origin := c.Request.Header.Get("Origin")
 		if origin != "" {
-			// 你也可以写死成 http://localhost:5173
 			c.Header("Access-Control-Allow-Origin", origin)
 			c.Header("Access-Control-Allow-Credentials", "true")
 			c.Header("Access-Control-Allow-Headers", "Content-Type, Authorization")
@@ -62,5 +61,14 @@ func NewHandler() http.Handler {
 		mg.POST("/update", mdHandler.UpdateDocument)
 		mg.GET("/stream/:hash", mdHandler.StreamDocument)
 	}
+
+	// HttpTest 分组
+	httpTestService := service.NewHttpTestService()
+	httpTestHandler := NewHttpTestHandler(httpTestService)
+	hg := r.Group("/httptest")
+	{
+		hg.POST("/do", httpTestHandler.Do)
+	}
+
 	return r
 }
