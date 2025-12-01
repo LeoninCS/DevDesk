@@ -2,22 +2,24 @@
 <template>
   <div class="mde-page">
     <div class="mde-card">
-      <!-- 顶部工具栏 -->
       <header class="mde-header">
         <div class="mde-header-left">
-          <h1 class="mde-title">Markdown 编辑器</h1>
+          <p class="eyebrow">Markdown</p>
+          <h1 class="mde-title">在线编辑器</h1>
           <p class="mde-meta">
             文档哈希：<code>{{ hash }}</code>
           </p>
           <div class="mde-share-row">
-            <span class="mde-meta-label">分享链接：</span>
+            <span class="mde-meta-label">分享链接</span>
             <input
               ref="shareInputRef"
               class="mde-share-input"
               :value="shareUrl"
               readonly
             />
-            <button class="mde-copy-btn" @click="copyShareLink">复制</button>
+            <button class="mde-copy-btn" @click="copyShareLink">
+              复制
+            </button>
           </div>
         </div>
 
@@ -35,13 +37,13 @@
               :disabled="exporting"
               @click="exportMarkdown"
             >
-              导入Markdown
+              导出 Markdown
             </button>
             <button class="mde-btn" :disabled="exporting" @click="exportHtml">
-              导出HTML
+              导出 HTML
             </button>
             <button class="mde-btn" :disabled="exporting" @click="exportPdf">
-              导出PDF
+              导出 PDF
             </button>
           </div>
           <button class="mde-back" @click="goIntro">
@@ -50,13 +52,11 @@
         </div>
       </header>
 
-      <!-- 错误提示 -->
       <p v-if="error" class="mde-error">{{ error }}</p>
 
-      <!-- 主编辑区：左右分栏，占满卡片剩余高度 -->
       <main class="mde-main">
         <section class="mde-pane">
-          <div class="mde-pane-header">编辑区</div>
+          <div class="mde-pane-header">编辑</div>
           <textarea
             v-model="content"
             class="mde-editor"
@@ -111,12 +111,10 @@ let sendTimer: number | null = null;
 let es: EventSource | null = null;
 let isRemoteUpdate = false;
 
-// 预览 HTML
 const previewHtml = computed(() => {
   return marked.parse(content.value || "");
 });
 
-// 分享链接：直接用当前地址
 const shareUrl = computed(() => window.location.href);
 
 const formatTime = (d: Date) => {
@@ -147,7 +145,6 @@ const initDoc = async () => {
   }
 };
 
-// 本地编辑 -> 防抖保存
 const handleInput = () => {
   if (isRemoteUpdate) return;
   if (!hash.value) return;
@@ -175,23 +172,21 @@ const handleInput = () => {
   }, 400);
 };
 
-// 复制分享链接
 const copyShareLink = async () => {
   try {
     if (navigator.clipboard) {
       await navigator.clipboard.writeText(shareUrl.value);
-      alert("已复制链接，可以发给别人一起编辑");
+      alert("已复制链接，可以发给同事一起编辑。");
     } else if (shareInputRef.value) {
       shareInputRef.value.select();
       document.execCommand("copy");
-      alert("已复制链接，可以发给别人一起编辑");
+      alert("已复制链接，可以发给同事一起编辑。");
     }
   } catch {
-    alert("复制失败，请手动复制输入框内容");
+    alert("复制失败，请手动复制输入框内容。");
   }
 };
 
-// 导出 .md
 const exportMarkdown = () => {
   const blob = new Blob([content.value || ""], {
     type: "text/markdown;charset=utf-8",
@@ -206,7 +201,6 @@ const exportMarkdown = () => {
   URL.revokeObjectURL(url);
 };
 
-// 导出 .html
 const exportHtml = () => {
   const bodyContent = previewHtml.value;
   const fullHtml = `<!DOCTYPE html>
@@ -267,7 +261,6 @@ ${bodyContent}
   URL.revokeObjectURL(url);
 };
 
-// 导出 .pdf（基于预览区截图）
 const exportPdf = async () => {
   if (!previewRef.value) {
     alert("预览区未就绪，稍后再试");
@@ -307,7 +300,6 @@ const exportPdf = async () => {
   }
 };
 
-// SSE 协同
 const initSSE = () => {
   if (!hash.value) return;
   es = new EventSource(`${apiBaseUrl}/markdown/stream/${hash.value}`);
@@ -369,25 +361,22 @@ onBeforeUnmount(() => {
 <style scoped>
 .mde-page {
   width: 100%;
-  /* 原来有 max-width + margin: 0 auto，会被居中变窄，这里干掉 */
   margin: 0;
-  /* 上下保留一点内边距，左右贴满 content */
-  padding: 4px 0 16px;
+  padding: 6px 0 16px;
 }
 
 .mde-card {
   background: var(--moment-card-bg, #ffffff);
   border-radius: 16px;
-  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
-  padding: 16px 18px 18px;
+  box-shadow: 0 16px 38px rgba(15, 23, 42, 0.12);
+  padding: 18px 18px 18px;
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
-
-  /* 关键：宽度铺满 content，高度尽量吃满视口 */
   width: 100%;
-  height: calc(100vh - 120px); /* 这里 120px 预留给顶部导航+content padding，可以按需要微调 */
+  height: calc(100vh - 120px);
   max-height: none;
+  border: 1px solid #e5e7eb;
 }
 
 .mde-header {
@@ -402,10 +391,18 @@ onBeforeUnmount(() => {
   min-width: 0;
 }
 
-.mde-title {
+.eyebrow {
   margin: 0;
-  font-size: 20px;
-  font-weight: 700;
+  font-size: 12px;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.mde-title {
+  margin: 2px 0 0;
+  font-size: 22px;
+  font-weight: 800;
 }
 
 .mde-meta {
@@ -422,7 +419,7 @@ onBeforeUnmount(() => {
 }
 
 .mde-share-row {
-  margin-top: 6px;
+  margin-top: 8px;
   display: flex;
   align-items: center;
   gap: 6px;
@@ -437,7 +434,7 @@ onBeforeUnmount(() => {
 .mde-share-input {
   flex: 1;
   min-width: 220px;
-  padding: 4px 8px;
+  padding: 6px 8px;
   border-radius: 8px;
   border: 1px solid #d1d5db;
   font-size: 12px;
@@ -445,9 +442,9 @@ onBeforeUnmount(() => {
 }
 
 .mde-copy-btn {
-  border-radius: 999px;
+  border-radius: 10px;
   border: none;
-  padding: 4px 10px;
+  padding: 6px 12px;
   font-size: 12px;
   cursor: pointer;
   background: #2563eb;
@@ -486,9 +483,9 @@ onBeforeUnmount(() => {
 }
 
 .mde-btn {
-  border-radius: 999px;
+  border-radius: 10px;
   border: none;
-  padding: 4px 10px;
+  padding: 6px 12px;
   font-size: 12px;
   cursor: pointer;
   background: #e5e7eb;
@@ -501,9 +498,9 @@ onBeforeUnmount(() => {
 }
 
 .mde-back {
-  border-radius: 999px;
+  border-radius: 10px;
   border: none;
-  padding: 5px 12px;
+  padding: 7px 12px;
   font-size: 12px;
   cursor: pointer;
   background: #f3f4f6;
@@ -516,13 +513,12 @@ onBeforeUnmount(() => {
   color: #dc2626;
 }
 
-/* 主编辑区：占满卡片剩余空间 */
 .mde-main {
-  margin-top: 6px;
+  margin-top: 8px;
   flex: 1;
   display: flex;
   gap: 10px;
-  min-height: 0; /* 这一句很关键，防止子元素撑破高度 */
+  min-height: 0;
 }
 
 .mde-pane {
@@ -533,20 +529,21 @@ onBeforeUnmount(() => {
 }
 
 .mde-pane-header {
-  padding: 6px 10px;
+  padding: 8px 12px;
   font-size: 12px;
-  background: #f3f4f6;
-  border-radius: 10px 10px 0 0;
+  background: linear-gradient(90deg, #f3f4f6, #e5e7eb);
+  border-radius: 12px 12px 0 0;
   border-bottom: 1px solid #e5e7eb;
-  color: #6b7280;
+  color: #475569;
+  font-weight: 700;
 }
 
 .mde-editor {
   flex: 1;
   border: 1px solid #e5e7eb;
   border-top: none;
-  border-radius: 0 0 10px 10px;
-  padding: 10px;
+  border-radius: 0 0 12px 12px;
+  padding: 12px;
   font-family: "JetBrains Mono", "SF Mono", Menlo, Monaco, Consolas,
     "Courier New", monospace;
   font-size: 13px;
@@ -559,7 +556,7 @@ onBeforeUnmount(() => {
   flex: 1;
   border: 1px solid #e5e7eb;
   border-top: none;
-  border-radius: 0 0 10px 10px;
+  border-radius: 0 0 12px 12px;
   padding: 12px 14px;
   font-size: 14px;
   overflow: auto;
@@ -567,7 +564,6 @@ onBeforeUnmount(() => {
   line-height: 1.6;
 }
 
-/* Markdown 样式保持不变 */
 :deep(.mde-preview h1) {
   font-size: 24px;
   margin: 16px 0 8px;
@@ -626,10 +622,10 @@ onBeforeUnmount(() => {
   .mde-header-right {
     align-self: stretch;
     justify-content: flex-end;
+    flex-wrap: wrap;
   }
   .mde-main {
     flex-direction: column;
   }
 }
 </style>
-

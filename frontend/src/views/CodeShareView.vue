@@ -1,52 +1,60 @@
 <template>
-  <div class="codeshare-view">
-    <h1>代码片段</h1>
-
-    <!-- 只要加载成功、没有错误，就显示分享提示 -->
-    <div v-if="!loading && !error" class="share-tip">
-      <span class="share-tip-text">
-        分享说明：把当前页面链接发给朋友，对方就可以打开这个代码片段。
-      </span>
-      <button class="share-tip-btn" @click="copyLink">
-        {{ linkCopied ? '已复制链接' : '复制当前链接' }}
-      </button>
-    </div>
-
-    <div v-if="loading" class="status">加载中...</div>
-    <div v-else-if="error" class="status error">{{ error }}</div>
-
-    <div
-      v-else
-      class="code-card"
-      :class="`code-card--${codeTheme}`"
-    >
-      <div class="top-row">
-        <div class="meta">
-          <span v-if="author">发布者：{{ author }}</span>
-          <span v-if="language" class="lang-tag">语法：{{ language }}</span>
-        </div>
-
-        <div class="actions">
-          <button class="btn" @click="toggleCodeTheme">
-            {{ codeTheme === 'dark' ? '切换为浅色' : '切换为深色' }}
+  <div class="csv-page">
+    <section class="csv-hero">
+      <div>
+        <p class="eyebrow">CodeShare</p>
+        <h1>分享给队友的代码片段</h1>
+        <p class="sub">
+          打开链接即可查看代码。支持语法高亮、主题切换、复制代码和快速分享当前页面。
+        </p>
+        <div class="hero-actions">
+          <button class="btn ghost" @click="copyLink">
+            {{ linkCopied ? "已复制链接" : "复制当前链接" }}
           </button>
-          <button class="btn" @click="copyCode">
-            {{ copied ? '已复制' : '复制代码' }}
+          <button class="btn ghost" @click="copyCode">
+            {{ copied ? "已复制代码" : "复制代码" }}
           </button>
         </div>
       </div>
+      <div class="hero-meta">
+        <div class="meta-row">
+          <span class="label">发布者</span>
+          <span class="value">{{ author || "匿名" }}</span>
+        </div>
+        <div class="meta-row">
+          <span class="label">语法</span>
+          <span class="value">{{ language || "纯文本" }}</span>
+        </div>
+        <div class="meta-row">
+          <span class="label">主题</span>
+          <button class="btn inline" @click="toggleCodeTheme">
+            {{ codeTheme === "dark" ? "切换为浅色" : "切换为深色" }}
+          </button>
+        </div>
+      </div>
+    </section>
 
-      <pre class="pre-wrap">
-        <code
-          ref="codeEl"
-          :class="[
-            'code-block',
-            `language-${languageClass}`,
-            `code-block--${codeTheme}`,
-          ]"
-        >{{ content }}</code>
-      </pre>
-    </div>
+    <section class="csv-card" :class="`csv-card--${codeTheme}`">
+      <header class="card-head">
+        <div>
+          <h2>代码内容</h2>
+          <p class="muted">已高亮显示，支持手动复制。</p>
+        </div>
+        <span v-if="language" class="lang-tag">{{ language }}</span>
+      </header>
+
+      <div v-if="loading" class="status">加载中...</div>
+      <div v-else-if="error" class="status error">{{ error }}</div>
+
+      <div v-else class="code-wrap">
+        <pre class="pre-wrap">
+          <code
+            ref="codeEl"
+            :class="['code-block', `language-${languageClass}`, `code-block--${codeTheme}`]"
+          >{{ content }}</code>
+        </pre>
+      </div>
+    </section>
   </div>
 </template>
 
@@ -69,11 +77,8 @@ const content = ref("");
 
 const codeEl = ref<HTMLElement | null>(null);
 
-// 代码背景主题：dark / light
 const codeTheme = ref<"dark" | "light">("dark");
-// 复制代码状态
 const copied = ref(false);
-// 复制链接状态
 const linkCopied = ref(false);
 
 const languageClass = computed(() => {
@@ -151,7 +156,6 @@ async function copyCode() {
   }
 }
 
-// 复制当前页面链接
 async function copyLink() {
   const url = typeof window !== "undefined" ? window.location.href : "";
   if (!url) return;
@@ -199,141 +203,141 @@ async function copyLink() {
 </script>
 
 <style scoped>
-.codeshare-view {
+.csv-page {
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 20px 4vw;
+  padding: 10px 6px 26px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
   box-sizing: border-box;
 }
 
-h1 {
-  margin: 0 0 10px;
-  font-size: 22px;
-}
-
-/* 分享提示条 */
-.share-tip {
-  display: flex;
+.csv-hero {
+  background: linear-gradient(120deg, #0ea5e9 0%, #2563eb 50%, #111827 100%);
+  color: #f8fafc;
+  border-radius: 16px;
+  padding: 20px 18px;
+  display: grid;
+  grid-template-columns: 1.4fr 0.8fr;
+  gap: 16px;
   align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  margin-bottom: 12px;
-  padding: 8px 10px;
-  border-radius: 8px;
-  background: rgba(37, 99, 235, 0.06);
-  border: 1px dashed rgba(37, 99, 235, 0.3);
-  font-size: 13px;
-  color: #374151;
 }
 
-.share-tip-text {
-  flex: 1;
-}
-
-.share-tip-btn {
-  flex-shrink: 0;
-  padding: 4px 10px;
+.eyebrow {
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 1px;
   font-size: 12px;
-  border-radius: 999px;
-  border: 1px solid #2563eb;
-  background: #2563eb;
-  color: #ffffff;
-  cursor: pointer;
-  transition: transform 0.05s ease, box-shadow 0.1s ease;
+  opacity: 0.8;
 }
 
-.share-tip-btn:active {
-  transform: scale(0.97);
+.csv-hero h1 {
+  margin: 6px 0 6px;
+  font-size: 24px;
 }
 
-.status {
-  padding: 12px 0;
-  font-size: 14px;
-  color: #6b7280;
+.sub {
+  margin: 0 0 10px;
+  line-height: 1.5;
+  max-width: 720px;
 }
 
-.status.error {
-  color: #ef4444;
+.hero-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
-.code-card {
-  border-radius: 8px;
-  padding: 16px 18px;
+.hero-meta {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 14px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.meta-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.label {
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+.value {
+  font-weight: 700;
+}
+
+.csv-card {
+  border-radius: 16px;
+  padding: 16px 16px 18px;
   border: 1px solid #1f2937;
   overflow: hidden;
 }
 
-.code-card--dark {
-  background: #21222c;
+.csv-card--dark {
+  background: #0f172a;
   color: #e5e7eb;
 }
 
-.code-card--light {
+.csv-card--light {
   background: #f9fafb;
   color: #111827;
   border-color: #d1d5db;
 }
 
-:global([data-theme="light"]) .codeshare-view .code-card--dark {
-  background: #111827;
-  border-color: #1f2937;
-}
-
-.top-row {
+.card-head {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 10px;
+  gap: 8px;
 }
 
-.meta {
-  font-size: 13px;
+.card-head h2 {
+  margin: 0;
+  font-size: 20px;
+}
+
+.muted {
+  margin: 2px 0 0;
   color: #9ca3af;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  align-items: center;
+  font-size: 12px;
 }
 
 .lang-tag {
-  padding: 2px 8px;
+  padding: 6px 10px;
   border-radius: 999px;
-  border: 1px solid #4b5563;
+  border: 1px solid currentColor;
   font-size: 12px;
 }
 
-.actions {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
+.status {
+  padding: 12px 0;
+  font-size: 14px;
+  color: #cbd5e1;
 }
 
-.btn {
-  padding: 4px 10px;
-  font-size: 12px;
-  border-radius: 999px;
-  border: 1px solid #4b5563;
-  background: transparent;
-  color: inherit;
-  cursor: pointer;
-  transition: background 0.2s, transform 0.05s;
+.status.error {
+  color: #fca5a5;
 }
 
-.btn:hover {
-  background: rgba(255, 255, 255, 0.08);
-}
-
-.btn:active {
-  transform: scale(0.97);
+.code-wrap {
+  margin-top: 10px;
 }
 
 .pre-wrap {
   margin: 0;
   font-size: 13px;
   line-height: 1.5;
-  max-height: 70vh;
+  max-height: 72vh;
   overflow: auto;
   background: transparent;
 }
@@ -344,44 +348,48 @@ h1 {
 }
 
 .code-block--dark {
-  background: #292a36 !important;
-  color: #f5f6f8 !important;
+  background: #111827 !important;
+  color: #f8fafc !important;
 }
 
 .code-block--light {
-  background: #eaeaeb !important;
+  background: #e5e7eb !important;
   color: #111827 !important;
 }
 
+.btn {
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  background: transparent;
+  color: #f8fafc;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.btn.ghost {
+  backdrop-filter: blur(6px);
+}
+
+.btn.inline {
+  border-color: rgba(255, 255, 255, 0.5);
+  color: #f8fafc;
+}
+
+:global([data-theme="light"]) .btn.inline {
+  color: #111827;
+  border-color: #d1d5db;
+}
+
+@media (max-width: 900px) {
+  .csv-hero {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media (max-width: 768px) {
-  .codeshare-view {
-    padding: 16px 3vw;
-  }
-
-  .code-card {
-    padding: 12px 12px;
-  }
-
-  h1 {
-    font-size: 20px;
-  }
-
-  .top-row {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .actions {
-    align-self: stretch;
-  }
-
-  .share-tip {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .share-tip-btn {
-    align-self: flex-end;
+  .csv-card {
+    padding: 12px;
   }
 }
 </style>

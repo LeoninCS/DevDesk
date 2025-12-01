@@ -1,71 +1,105 @@
 <template>
-  <div class="codeshare">
-    <h1>代码分享</h1>
-    <p class="desc">在这里粘贴你的代码，生成一个可分享的片段。（已接入后端）</p>
-
-    <form @submit.prevent="handleSubmit">
-      <!-- 上面三列：发布者 / 语法 / 过期时间 -->
-      <div class="row">
-        <div class="field">
-          <label>发布者</label>
-          <input
-            v-model="form.poster"
-            placeholder="你的昵称"
-            maxlength="30"
-          />
-          <small>最多 30 个字符</small>
-        </div>
-
-        <div class="field">
-          <label>语法高亮</label>
-          <select v-model="form.syntax">
-            <option
-              v-for="opt in syntaxes"
-              :key="opt.value"
-              :value="opt.value"
-            >
-              {{ opt.label }}
-            </option>
-          </select>
-        </div>
-
-        <div class="field">
-          <label>过期时间</label>
-          <select v-model="form.expiration">
-            <option
-              v-for="opt in expirations"
-              :key="opt.value"
-              :value="opt.value"
-            >
-              {{ opt.label }}
-            </option>
-          </select>
-          <small>大致时间，实际以后端配置为准</small>
+  <div class="cs-page">
+    <section class="cs-hero">
+      <div>
+        <p class="eyebrow">CodeShare</p>
+        <h1>生成可分享的代码片段</h1>
+        <p class="sub">
+          贴上代码，选择语法高亮和过期时间，一键获取可分享的链接。已接入后端，分享出去即可在线查看。
+        </p>
+        <div class="chips">
+          <span class="chip">语法高亮</span>
+          <span class="chip">临时/短链</span>
+          <span class="chip">便捷复制</span>
         </div>
       </div>
-
-      <!-- 内容区 -->
-      <div class="field">
-        <label>代码内容</label>
-        <textarea
-          v-model="form.content"
-          rows="14"
-          placeholder="在这里输入或粘贴代码……"
-        />
+      <div class="hero-card">
+        <div class="hero-stat">
+          <p class="hero-label">默认过期</p>
+          <p class="hero-value">24h</p>
+        </div>
+        <div class="hero-divider"></div>
+        <div class="hero-stat">
+          <p class="hero-label">支持</p>
+          <p class="hero-value">多语言</p>
+        </div>
       </div>
+    </section>
 
-      <!-- 提交区 -->
-      <div class="actions">
-        <button type="submit" :disabled="!form.content.trim() || loading">
-          {{ loading ? "提交中..." : "生成分享链接" }}
-        </button>
-
-        <span v-if="shareUrl" class="share-url">
-          分享链接：
+    <section class="cs-card">
+      <header class="cs-card-head">
+        <div>
+          <p class="eyebrow">创建分享</p>
+          <h2>填写信息并生成链接</h2>
+          <p class="muted">支持作者昵称、语法选择和自定义过期时间。</p>
+        </div>
+        <div v-if="shareUrl" class="share-chip">
+          <span>已生成链接</span>
           <a :href="shareUrl" target="_blank">{{ shareUrl }}</a>
-        </span>
-      </div>
-    </form>
+        </div>
+      </header>
+
+      <form @submit.prevent="handleSubmit">
+        <div class="row">
+          <div class="field">
+            <label>发布者</label>
+            <input
+              v-model="form.poster"
+              placeholder="你的昵称"
+              maxlength="30"
+            />
+            <small>可为空，最长 30 个字符</small>
+          </div>
+
+          <div class="field">
+            <label>语法高亮</label>
+            <select v-model="form.syntax">
+              <option
+                v-for="opt in syntaxes"
+                :key="opt.value"
+                :value="opt.value"
+              >
+                {{ opt.label }}
+              </option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label>过期时间</label>
+            <select v-model="form.expiration">
+              <option
+                v-for="opt in expirations"
+                :key="opt.value"
+                :value="opt.value"
+              >
+                {{ opt.label }}
+              </option>
+            </select>
+            <small>大致时间，实际以后端配置为准</small>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>代码内容</label>
+          <textarea
+            v-model="form.content"
+            rows="14"
+            placeholder="在这里输入或粘贴代码..."
+          />
+        </div>
+
+        <div class="actions">
+          <button type="submit" :disabled="!form.content.trim() || loading">
+            {{ loading ? "提交中..." : "生成分享链接" }}
+          </button>
+
+          <span v-if="shareUrl" class="share-url">
+            分享链接：
+            <a :href="shareUrl" target="_blank">{{ shareUrl }}</a>
+          </span>
+        </div>
+      </form>
+    </section>
   </div>
 </template>
 
@@ -83,7 +117,7 @@ const syntaxes = [
   { value: "vue", label: "Vue" },
   { value: "python", label: "Python" },
   { value: "go", label: "Go" },
-  { value: "c_cpp", label: "C / C++" }
+  { value: "c_cpp", label: "C / C++" },
 ];
 
 const expirations = [
@@ -98,13 +132,12 @@ const form = ref({
   poster: "",
   syntax: "plaintext",
   expiration: "1day",
-  content: ""
+  content: "",
 });
 
 const loading = ref(false);
 const shareUrl = ref("");
 
-// 过期时间映射：把选择的项换成秒数
 const expirationSecondsMap: Record<string, number> = {
   "10min": 10 * 60,
   "1hour": 60 * 60,
@@ -120,11 +153,10 @@ async function handleSubmit() {
   shareUrl.value = "";
 
   try {
-    const now = Math.floor(Date.now() / 1000); // 当前时间戳（秒）
-    const delta = expirationSecondsMap[form.value.expiration] || (24 * 60 * 60);
-    const destroyTime = now + delta; // 过期时间时间戳
+    const now = Math.floor(Date.now() / 1000);
+    const delta = expirationSecondsMap[form.value.expiration] || 24 * 60 * 60;
+    const destroyTime = now + delta;
 
-    // 使用封装好的 API
     const res = await uploadCode({
       author: form.value.poster,
       language: form.value.syntax,
@@ -137,8 +169,6 @@ async function handleSubmit() {
     const finalUrl = urlFromServer || `${window.location.origin}/c/${hash}`;
 
     shareUrl.value = finalUrl;
-
-    // 自动跳转到查看页
     router.push(`/code/${hash}`);
   } catch (err) {
     console.error(err);
@@ -150,62 +180,167 @@ async function handleSubmit() {
 </script>
 
 <style scoped>
-.codeshare {
-  /* 宽度按百分比，左右留一点边距 */
+.cs-page {
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 4vw; /* 4% 视口宽度边距 */
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 8px 6px 24px;
   box-sizing: border-box;
 }
 
-h1 {
-  margin: 0 0 8px;
-  font-size: 24px;
+.cs-hero {
+  background: linear-gradient(120deg, #0ea5e9 0%, #2563eb 40%, #111827 100%);
+  color: #f8fafc;
+  border-radius: 16px;
+  padding: 20px 18px;
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 14px;
+  align-items: center;
 }
 
-.desc {
-  margin: 0 0 24px;
-  font-size: 14px;
+.eyebrow {
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+.cs-hero h1 {
+  margin: 6px 0 4px;
+  font-size: 26px;
+}
+
+.sub {
+  margin: 0 0 10px;
+  max-width: 760px;
+  line-height: 1.5;
+}
+
+.chips {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.chip {
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  font-size: 12px;
+  color: #e2e8f0;
+}
+
+.hero-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 14px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.hero-stat {
+  text-align: center;
+}
+
+.hero-label {
+  margin: 0;
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+.hero-value {
+  margin: 4px 0 0;
+  font-size: 20px;
+  font-weight: 800;
+}
+
+.hero-divider {
+  width: 1px;
+  height: 36px;
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.cs-card {
+  background: var(--moment-card-bg, #ffffff);
+  border-radius: 16px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 12px 38px rgba(15, 23, 42, 0.08);
+  padding: 18px 18px 22px;
+  box-sizing: border-box;
+}
+
+.cs-card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.cs-card-head h2 {
+  margin: 4px 0 4px;
+  font-size: 22px;
+}
+
+.muted {
+  margin: 0;
   color: #6b7280;
+  font-size: 13px;
 }
 
-/* 表单整体卡片，宽度跟随父容器百分比 */
+.share-chip {
+  background: #ecfdf3;
+  border: 1px solid #bbf7d0;
+  color: #15803d;
+  padding: 10px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  max-width: 320px;
+}
+
+.share-chip a {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+  font-weight: 600;
+  margin-top: 4px;
+  word-break: break-all;
+}
+
 form {
   width: 100%;
-  background: rgba(255, 255, 255, 0.98);
-  padding: 20px 24px;
-  border-radius: 8px;
-  border: 1px solid #e5e7eb;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
 }
 
-/* 深色模式下的适配 */
-:global([data-theme="dark"]) .codeshare form {
-  background: #111827;
-  border-color: #374151;
-}
-
-/* 顶部三列：桌面端三列布局 */
 .row {
   display: grid;
   grid-template-columns: 1.2fr 1fr 1fr;
   gap: 16px;
-  margin-bottom: 16px;
 }
 
 .field {
   display: flex;
   flex-direction: column;
-  margin-bottom: 16px;
+  gap: 6px;
 }
 
 .field label {
   font-size: 14px;
-  margin-bottom: 6px;
+  font-weight: 600;
+  color: #111827;
 }
 
 .field small {
-  margin-top: 4px;
   font-size: 12px;
   color: #9ca3af;
 }
@@ -213,108 +348,87 @@ form {
 input,
 select,
 textarea {
-  padding: 8px 10px;
-  border-radius: 4px;
+  padding: 10px 12px;
+  border-radius: 10px;
   border: 1px solid #d1d5db;
   font: inherit;
-  width: 100%;        /* 控件宽度占满父容器 */
+  width: 100%;
   box-sizing: border-box;
+  background: #ffffff;
 }
 
-/* 深色下输入框 */
-:global([data-theme="dark"]) input,
-:global([data-theme="dark"]) select,
-:global([data-theme="dark"]) textarea {
-  background: #111827;
-  border-color: #4b5563;
-  color: #e5e7eb;
-}
-
-/* 文本框高度按视口百分比，手机也能比较好用 */
 textarea {
   resize: vertical;
-  min-height: 30vh;   /* 至少占视口高度 30% */
+  min-height: 32vh;
+  font-family: "JetBrains Mono", Consolas, monospace;
 }
 
-/* 底部按钮区域 */
 .actions {
-  margin-top: 12px;
+  margin-top: 6px;
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
   flex-wrap: wrap;
 }
 
 .actions button {
-  background: #16a34a;
+  background: linear-gradient(120deg, #2563eb, #4f46e5);
   color: #fff;
-  border-radius: 4px;
-  padding: 8px 16px;
+  border-radius: 12px;
+  padding: 10px 18px;
   border: none;
   cursor: pointer;
+  font-weight: 700;
+  box-shadow: 0 10px 24px rgba(79, 70, 229, 0.35);
 }
 
 .actions button:disabled {
-  opacity: 0.6;
+  opacity: 0.65;
   cursor: not-allowed;
+  box-shadow: none;
 }
 
 .share-url {
-  font-size: 14px;
+  font-size: 13px;
+  color: #374151;
 }
 
 .share-url a {
   color: #2563eb;
+  word-break: break-all;
 }
 
-/* ===========================
-   响应式：平板 / 手机适配
-   =========================== */
+:global([data-theme="dark"]) .cs-card {
+  background: #0b1222;
+  border-color: #1f2a44;
+}
+
+:global([data-theme="dark"]) input,
+:global([data-theme="dark"]) select,
+:global([data-theme="dark"]) textarea {
+  background: #0f172a;
+  border-color: #334155;
+  color: #e5e7eb;
+}
+
+@media (max-width: 960px) {
+  .cs-hero {
+    grid-template-columns: 1fr;
+  }
+}
 
 @media (max-width: 768px) {
-  .codeshare {
-    padding: 0 3vw;
-  }
-
-  form {
-    padding: 16px;
-  }
-
   .row {
     grid-template-columns: 1fr;
   }
 
-  h1 {
-    font-size: 20px;
-    text-align: center;
-  }
-
-  .desc {
-    text-align: center;
-  }
-
-  textarea {
-    min-height: 35vh;
-  }
-
-  .actions {
+  .cs-card-head {
     flex-direction: column;
-    align-items: stretch;
+    align-items: flex-start;
   }
 
-  .actions button {
-    width: 100%;
-    text-align: center;
-  }
-}
-
-@media (max-width: 480px) {
-  form {
-    padding: 12px;
-  }
-
-  .codeshare {
-    padding: 0 2vw;
+  .hero-card {
+    justify-content: center;
   }
 }
 </style>
