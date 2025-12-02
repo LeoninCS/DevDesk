@@ -10,6 +10,8 @@ import (
 
 func NewHandler() http.Handler {
 	r := gin.Default()
+	// Limit upload body size; keep it small for HTML hosting needs
+	r.MaxMultipartMemory = 2 << 20
 
 	// ===== CORS 中间件（前后端联调必须要有）=====
 	r.Use(func(c *gin.Context) {
@@ -40,7 +42,8 @@ func NewHandler() http.Handler {
 	}
 
 	// WorkPlan 分组
-	workPlanHandler := NewWorkPlanHandler()
+	workPlanService := service.NewWorkPlan()
+	workPlanHandler := NewWorkPlanHandler(workPlanService)
 	wg := r.Group("/workplan")
 	{
 		wg.GET("/new", workPlanHandler.NewPersonlPlan)
@@ -68,6 +71,21 @@ func NewHandler() http.Handler {
 	hg := r.Group("/httptest")
 	{
 		hg.POST("/do", httpTestHandler.Do)
+	}
+
+	// HTML 托管分组
+	htmlHostService, err := service.NewHTMLHostService(service.HTMLHostConfig{
+		BaseDir:      "hosted_html",
+		MaxSizeBytes: service.DefaultMaxHTMLSize,
+	})
+	if err != nil {
+		panic(err)
+	}
+	r.Static("/hosted", htmlHostService.BaseDir())
+	htmlHostHandler := NewHtmlHostHandler(htmlHostService, "/hosted")
+	hhg := r.Group("/html")
+	{
+		hhg.POST("/upload", htmlHostHandler.Upload)
 	}
 
 	return r
