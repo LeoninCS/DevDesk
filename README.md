@@ -15,10 +15,14 @@
 ---
 ## [功能演示](https://b23.tv/ZZQ79DS)
 ## 效果演示
-![alt text](/picture/image.png)
 ![alt text](/picture/image-1.png)
 ![alt text](/picture/image-2.png)
 ![alt text](/picture/image-3.png)
+![alt text](/picture/image-4.png)
+![alt text](/picture/image-5.png)
+![alt text](/picture/image-6.png)
+![alt text](/picture/image-7.png)
+![alt text](/picture/image-8.png)
 
 ## 📝 前言
 > **持续更新中，欢迎贡献代码！**  
@@ -35,8 +39,11 @@
 ---
 
 ## 🔧 功能介绍
-- **CodeShare**：代码分享功能，帮助你分享代码片段。
+- **Markdown Editor**：支持 Markdown 多人编辑和预览，支持导出多种格式。
+- **HTTP Interface Testing**：类似 Postman 的接口测试工具，支持多请求工作区和 JSON 导入导出。
 - **WorkPlan**：在这里存入你的计划，让你更好地管理时间。
+- **CodeShare**：代码分享功能，帮助你分享代码片段。
+- **HTMLHost**：提供在线 HTML 托管和预览服务。
 
 ---
 
