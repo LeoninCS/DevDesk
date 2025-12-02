@@ -95,10 +95,11 @@ const route = useRoute();
 
 const features = [
   { name: "home", label: "关于本站", path: "/" },
-  { name: "codeshare", label: "代码分享", path: "/codeshare" },
-  { name: "workplan", label: "待办事项", path: "/workplan" },
   { name: "markdown", label: "Markdown 编辑", path: "/markdown" },
   { name: "httptest", label: "HTTP 接口测试", path: "/httptest" },
+  { name: "workplan", label: "待办事项", path: "/workplan" },
+  { name: "codeshare", label: "代码分享", path: "/codeshare" },
+  { name: "htmlhost", label: "HTML 托管", path: "/html-host" },
 ];
 
 const search = ref("");
