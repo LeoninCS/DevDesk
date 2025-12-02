@@ -12,9 +12,9 @@ type WorkPlanHandler struct {
 	wp *service.WorkPlan
 }
 
-func NewWorkPlanHandler() *WorkPlanHandler {
+func NewWorkPlanHandler(srv *service.WorkPlan) *WorkPlanHandler {
 	return &WorkPlanHandler{
-		wp: service.NewWorkPlan(),
+		wp: srv,
 	}
 }
 
