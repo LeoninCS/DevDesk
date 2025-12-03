@@ -101,6 +101,7 @@ const saving = ref(false);
 const lastSavedAt = ref("");
 const lastSyncedContent = ref("");
 const hasPendingLocalChanges = ref(false);
+const pendingRemoteContent = ref<string | null>(null);
 
 const exporting = ref(false);
 
@@ -162,7 +163,18 @@ const handleInput = () => {
       await updateMarkdownDoc(hash.value, payload);
       lastSyncedContent.value = payload;
       lastSavedAt.value = formatTime(new Date());
-      hasPendingLocalChanges.value = false;
+      hasPendingLocalChanges.value = content.value !== payload;
+
+      if (!hasPendingLocalChanges.value && pendingRemoteContent.value !== null) {
+        const remoteDraft = pendingRemoteContent.value;
+        pendingRemoteContent.value = null;
+        if (remoteDraft !== content.value) {
+          isRemoteUpdate = true;
+          content.value = remoteDraft;
+          isRemoteUpdate = false;
+          lastSyncedContent.value = remoteDraft;
+        }
+      }
     } catch (e: any) {
       error.value =
         e?.response?.data?.error || e?.message || "保存失败，请稍后重试";
@@ -312,6 +324,7 @@ const initSSE = () => {
       if (remoteContent === content.value) {
         lastSyncedContent.value = remoteContent;
         hasPendingLocalChanges.value = false;
+        pendingRemoteContent.value = null;
         return;
       }
 
@@ -319,6 +332,11 @@ const initSSE = () => {
         hasPendingLocalChanges.value &&
         remoteContent === lastSyncedContent.value
       ) {
+        return;
+      }
+
+      if (hasPendingLocalChanges.value) {
+        pendingRemoteContent.value = remoteContent;
         return;
       }
 
